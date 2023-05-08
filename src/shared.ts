@@ -4,18 +4,34 @@ export type LoadConnect = () => Promise<StripeConnectWrapper>;
 
 const EXISTING_SCRIPT_MESSAGE =
   "loadConnect was called but an existing Connect.js script already exists in the document; existing script parameters will be used";
-const V0_URL = "https://connect-js.stripe.com/v0.1/connect.js";
+const V0_URL = "v0.1/connect.js";
 
 export const findScript = (): HTMLScriptElement | null => {
   return document.querySelectorAll<HTMLScriptElement>(
-    `script[src="${V0_URL}"]`
+    `script[src^="${V0_URL}"]`
   )[0];
 };
 
-const injectScript = (): HTMLScriptElement => {
-  const script = document.createElement("script");
-  script.src = "https://connect-js.stripe.com/v0.1/connect.js";
+const getUrlFromEnvironment = (env: string) => {
+  switch (env) {
+    case "devbox":
+      return "http://localhost:3001/";
+    case "qa":
+      return "https://qa-connect-js.stripe.com/";
+    case "preprod":
+      return "https://preprod-connect-js.stripe.com/";
+    case "prod":
+      return "https://connect-js.stripe.com/";
+    default:
+      return "https://connect-js.stripe.com/";
+  }
+};
 
+const injectScript = (env: string): HTMLScriptElement => {
+  const script = document.createElement("script");
+  const baseUrl = getUrlFromEnvironment(env);
+
+  script.src = `${baseUrl}${V0_URL}`;
   const head = document.head;
 
   if (!head) {
@@ -31,7 +47,9 @@ const injectScript = (): HTMLScriptElement => {
 
 let stripePromise: Promise<StripeConnectWrapper> | null = null;
 
-export const loadScript = (): Promise<StripeConnectWrapper | null> => {
+export const loadScript = (
+  env: string
+): Promise<StripeConnectWrapper | null> => {
   // Ensure that we only attempt to load Connect.js at most once
   if (stripePromise !== null) {
     return stripePromise;
@@ -54,7 +72,7 @@ export const loadScript = (): Promise<StripeConnectWrapper | null> => {
       if (script) {
         console.warn(EXISTING_SCRIPT_MESSAGE);
       } else if (!script) {
-        script = injectScript();
+        script = injectScript(env);
       }
 
       script.addEventListener("load", () => {
