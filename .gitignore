@@ -6,3 +6,6 @@ dist
 .vim
 /examples/rollup/public/index.js
 yalc.lock
+
+# We ignore this file as it will be written automatically written to before each build / after each install
+src/version.ts

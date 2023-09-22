@@ -1,9 +1,9 @@
-import { version } from ".././package.json";
 import {
   StripeConnectWrapper,
   IStripeConnectInitParams,
   ConnectElementTagName
 } from "../types";
+import { npmPackageVersion } from "./version";
 
 export type LoadConnect = () => Promise<StripeConnectWrapper>;
 
@@ -118,7 +118,7 @@ const createWrapper = (stripeConnect: any) => {
           ...metaOptions,
           sdk: true,
           sdkOptions: {
-            sdkVersion: version
+            sdkVersion: npmPackageVersion
           }
         }
       });

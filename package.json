@@ -7,13 +7,15 @@
   "types": "types/index.d.ts",
   "typings": "types/index.d.ts",
   "scripts": {
-    "test": "yarn lint && yarn test:unit --passWithNoTests && yarn typecheck",
+    "test": "yarn lint && yarn test:unit && yarn typecheck",
     "test:unit": "jest",
     "test:types": "zx ./tests/types/scripts/test.mjs",
     "lint": "eslint '{src,types}/**/*.{ts,js}' && yarn prettier-check",
     "typecheck": "tsc --noEmit",
+    "prebuild": "node -p \"'export const npmPackageVersion = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "postinstall": "npm run prebuild",
     "build": "yarn clean && rollup -c",
-    "validate-change": "yarn run typescript && yarn run lint && yarn run test",
+    "validate-change": "yarn run test",
     "clean": "rimraf dist",
     "prettier": "prettier './**/*.{js,ts,md,html,css}' --write",
     "prettier-check": "prettier './**/*.{js,ts,md,html,css}' --check"
